@@ -1,0 +1,67 @@
+# num, frm, to = list(map(int, re.search(r'move (\d+) from (\d+) to (\d+)', line).groups()))
+# from dijkstar import Graph, find_path
+# graph = Graph()
+# graph.add_edge(node1, node2, weight)
+# path = find_path(graph, create_node_name((0,0)), create_node_name(np.array(array.shape)-1))
+
+import re
+myfile = open("input.txt")
+content = myfile.read()
+
+class File:
+  def __init__(self, name, size, is_file, parent_file):
+    self.name = name
+    self.size = size
+    self.is_file = is_file
+    self.parent_file = parent_file
+    self.children = {}
+
+root = File("/", 0, False, None)
+all_filees = []
+curr = root
+i = 1
+content = content.splitlines()
+while i < len(content):
+  if content[i].split()[-1] == "ls":
+    i += 1
+    while content[i][0] != "$":
+      file_or_dir_name = content[i].split()[-1]
+      if content[i].split()[0] == "dir":
+        folder = File(file_or_dir_name, 0, False, curr)
+        all_filees.append(folder)
+        curr.children[file_or_dir_name] = folder
+      elif content[i].split()[0].isdigit():
+        file_size = int(content[i].split()[0])
+        filee = File(file_or_dir_name, file_size, True, curr)
+        all_filees.append(filee)
+        curr.children[file_or_dir_name] = filee
+      else:
+        assert(False)
+      i += 1
+      if i >= len(content):
+        break
+  elif content[i].split()[-1] == "..":
+    curr = curr.parent_file
+    i += 1
+  elif content[i].split()[1] == "cd" and content[i].split()[-1].isalpha():
+    curr = curr.children[content[i].split()[-1]]
+    i += 1
+
+def get_size(filee):
+  total = 0
+  if filee.is_file:
+    total += filee.size
+  else:
+    for child in filee.children.values():
+      total += get_size(child)
+  return total
+
+total = 0
+for filee in all_filees:
+  if filee.is_file:
+    continue
+  size = get_size(filee)
+  if size <= 100000:
+    total += size
+
+print(total)
