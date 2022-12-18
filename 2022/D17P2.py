@@ -1,9 +1,3 @@
-# num, frm, to = list(map(int, re.search(r'move (?\-\d+) from (\d+) to (\d+)', line).groups()))
-# from dijkstar import Graph, find_path
-# graph = Graph()
-# graph.add_edge(node1, node2, weight)
-# path = find_path(graph, create_node_name((0,0)), create_node_name(np.array(array.shape)-1))
-
 import re
 import numpy as np
 from copy import copy
@@ -21,8 +15,8 @@ class Rock:
 
 num_to_chr = [".", "#", "@"]
 
-def print_scrn():
-  return "\n".join(["".join([num_to_chr[int(x)] for x in row]) for row in np.flip(occupied, (0))])
+def print_scrn(grid):
+  return "\n".join(["".join([num_to_chr[int(x)] for x in row]) for row in np.flip(grid, (0))])
 
 rocks = []
 rocks.append(Rock([(0,x) for x in range(4)]))
@@ -31,8 +25,11 @@ rocks.append(Rock([(2,2),(1,2),(0,0),(0,1),(0,2)]))
 rocks.append(Rock([(y,0) for y in range(4)]))
 rocks.append(Rock([(0,0),(0,1),(1,0),(1,1)]))
 
+history_to_highest_rock = {}
+highest_rocks = []
+
 rock_index = 0
-curr_jet_index = 0
+jet_index = 0
 for i in range(2022):
   print(i)
   curr_rock = rocks[rock_index]
@@ -46,23 +43,25 @@ for i in range(2022):
     #occupied[curr_coords[:,0],curr_coords[:,1]] = 0
     
     # Move the rock according to the jet
-    if content[curr_jet_index] == ">":
+    if content[jet_index] == ">":
       curr_coords += [0,1]
       if max(curr_coords[:,1]) > 6 or sum(occupied[curr_coords[:,0],curr_coords[:,1]]) > 0:
         curr_coords -= [0,1]
-        print("Reverted right shift")
+        #print("Reverted right shift")
       else:
-        print("Right shift")
-    elif content[curr_jet_index] == "<":
+        pass
+        #print("Right shift")
+    elif content[jet_index] == "<":
       curr_coords -= [0,1]
       if min(curr_coords[:,1]) < 0 or sum(occupied[curr_coords[:,0],curr_coords[:,1]]) > 0:
         curr_coords += [0,1]
-        print("Reverted left shift")
+        #print("Reverted left shift")
       else:
-        print("Left shift")
+        pass
+        #print("Left shift")
     else:
       assert(False)
-    curr_jet_index = (curr_jet_index+1)%len(content)
+    jet_index = (jet_index+1)%len(content)
     
     # Move downwards
     curr_coords -= [1,0]
@@ -74,10 +73,26 @@ for i in range(2022):
       # Update the highest y
       highest_rock_y = max(np.argwhere(occupied==1)[:,0])
       rock_index = (rock_index+1)%len(rocks)
+      
+      if i > 200:
+        new_hist = ((rock_index, jet_index, print_scrn(occupied[highest_rock_y-200:highest_rock_y])))
+        if new_hist in history_to_highest_rock:
+          assert(False)
+        history_to_highest_rock[new_hist] = (highest_rock_y, i)
+        highest_rocks.append(highest_rock_y)
+      else:
+        highest_rocks.append(0)
       break
 
-# Debug prints
-#occupied[curr_coords[:,0],curr_coords[:,1]] = 1
-#print(print_scrn())
-#occupied[curr_coords[:,0],curr_coords[:,1]] = 0
-print(highest_rock_y)
+prev_highest, prev_i = history_to_highest_rock[new_hist]
+cycle_time = i-prev_i
+height_per_cycle = highest_rock_y - prev_highest
+print(highest_rock_y, height_per_cycle, cycle_time)
+
+num_whole_number_cycles = (1000000000000-i)//35
+new_y = highest_rock_y + (height_per_cycle*num_whole_number_cycles)
+cycles_left = (1000000000000-i)%35
+cycles_left -=1
+new_y += (highest_rocks[prev_i+cycles_left] - prev_highest)
+
+print(new_y)
