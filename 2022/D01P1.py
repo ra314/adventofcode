@@ -12,5 +12,3 @@ for line in content.splitlines():
 
 print(nums)
 print(max(nums))
-
-

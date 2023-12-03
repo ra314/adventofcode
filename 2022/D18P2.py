@@ -1,9 +1,3 @@
-# num, frm, to = list(map(int, re.search(r'move (?\-\d+) from (\d+) to (\d+)', line).groups()))
-# from dijkstar import Graph, find_path
-# graph = Graph()
-# graph.add_edge(node1, node2, weight)
-# path = find_path(graph, create_node_name((0,0)), create_node_name(np.array(array.shape)-1))
-
 import re
 import numpy as np
 from copy import copy

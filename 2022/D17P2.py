@@ -74,8 +74,8 @@ for i in range(2022):
       highest_rock_y = max(np.argwhere(occupied==1)[:,0])
       rock_index = (rock_index+1)%len(rocks)
       
-      if i > 200:
-        new_hist = ((rock_index, jet_index, print_scrn(occupied[highest_rock_y-200:highest_rock_y])))
+      if i > 100:
+        new_hist = ((rock_index, jet_index, print_scrn(occupied[highest_rock_y-100:highest_rock_y])))
         if new_hist in history_to_highest_rock:
           assert(False)
         history_to_highest_rock[new_hist] = (highest_rock_y, i)
@@ -89,10 +89,11 @@ cycle_time = i-prev_i
 height_per_cycle = highest_rock_y - prev_highest
 print(highest_rock_y, height_per_cycle, cycle_time)
 
-num_whole_number_cycles = (1000000000000-i)//35
+num_whole_number_cycles = (1000000000000-i)//cycle_time
 new_y = highest_rock_y + (height_per_cycle*num_whole_number_cycles)
-cycles_left = (1000000000000-i)%35
-cycles_left -=1
+cycles_left = 1000000000000-(i+(num_whole_number_cycles*cycle_time))
+# Off by 1 fix
+cycles_left -= 1
 new_y += (highest_rocks[prev_i+cycles_left] - prev_highest)
 
 print(new_y)
